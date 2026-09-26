@@ -1,8 +1,7 @@
-import './App.css'
-import logo from "./assets/images/logo-universal.png"
-import {Greet} from "../wailsjs/go/main/App";
-import {useState} from "preact/hooks";
-import {Fragment, h} from 'preact';
+import { Fragment, h } from 'preact';
+import { useState } from "preact/hooks";
+import { Greet } from "../wailsjs/go/main/App";
+import './App.css';
 
 export function App(props: any) {
     const [resultText, setResultText] = useState("Please enter your name below 👇");
@@ -17,7 +16,9 @@ export function App(props: any) {
     return (
         <>
             <div id="App">
-                <img src={logo} id="logo" alt="logo"/>
+                <div className="bulma-buttons">
+                    <button class="bulma-button bulma-is-info">Info</button>
+                </div>
                 <div id="result" className="result">{resultText}</div>
                 <div id="input" className="input-box">
                     <input id="name" className="input" onChange={updateName} autoComplete="off" name="input"
