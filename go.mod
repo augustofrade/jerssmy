@@ -1,4 +1,4 @@
-module github.com/augustofrade/jerrsmy
+module github.com/augustofrade/jerssmy
 
 go 1.27.1
 

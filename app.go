@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/augustofrade/jerrsmy/feed"
+	"github.com/augustofrade/jerssmy/feed"
 )
 
 // App struct

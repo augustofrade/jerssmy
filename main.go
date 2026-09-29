@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"embed"
 
-	"github.com/augustofrade/jerrsmy/appdir"
-	"github.com/augustofrade/jerrsmy/feed"
+	"github.com/augustofrade/jerssmy/appdir"
+	"github.com/augustofrade/jerssmy/feed"
 	_ "github.com/glebarez/go-sqlite"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"

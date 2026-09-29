@@ -1,4 +1,4 @@
-# JeRRSmy
+# JeRSSmy
 
 Jeremy is a graphical RSS aggregator.
 
