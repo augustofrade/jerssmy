@@ -10,6 +10,20 @@ func InitSchema(db *sql.DB) error {
 			url TEXT NOT NULL UNIQUE,
 			created_at TEXT NOT NULL
 		);
+
+		CREATE TABLE IF NOT EXISTS feed_article (
+			id INTEGER PRIMARY KEY,
+			title TEXT NOT NULL,
+			url TEXT NOT NULL UNIQUE,
+			publication_date TEXT NOT NULL,
+			description TEXT NOT NULL,
+			feed_id INTEGER NOT NULL,
+
+			CONSTRAINT fk_feeds
+			FOREIGN KEY (feed_id)
+			REFERENCES feeds(id)
+			ON DELETE CASCADE
+		);
 	`)
 
 	return err

@@ -2,7 +2,12 @@ package feed
 
 import (
 	"database/sql"
+	"errors"
 	"time"
+)
+
+var (
+	ErrFeedNotFound error = errors.New("Feed not found")
 )
 
 type Repository struct {
@@ -15,26 +20,42 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (s *Repository) CreateFeed(title string, url string) (*Feed, error) {
-	f := Feed{
-		Title:     title,
-		Url:       url,
-		CreatedAt: time.Now().UTC(),
-	}
-
+func (s *Repository) CreateFeed(f *Feed) error {
 	createdAtStr := f.CreatedAt.Format(time.RFC3339)
 
-	res, err := s.db.Exec("INSERT INTO feeds (title, url, created_at) VALUES (?, ?, ?)", title, url, createdAtStr)
+	res, err := s.db.Exec("INSERT INTO feeds (title, url, created_at) VALUES (?, ?, ?)",
+		f.Title, f.Url, createdAtStr)
+
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	f.Id, err = res.LastInsertId()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &f, nil
+	return nil
+}
+
+func (s *Repository) UpdateFeed(id int, options UpdateFeedOptions) error {
+	res, err := s.db.Exec(`UPDATE feeds SET title = ?
+	WHERE id = ?`, options.Title, id)
+
+	if err != nil {
+		return err
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return ErrFeedNotFound
+	}
+
+	return nil
 }
 
 func (s *Repository) RemoveFeed(id int) error {
@@ -42,6 +63,27 @@ func (s *Repository) RemoveFeed(id int) error {
 	return err
 }
 
+func (s *Repository) GetFeedByID(id int64) (*Feed, error) {
+	var feed Feed
+	var createdAtRaw string
+
+	err := s.db.QueryRow(
+		"SELECT id, title, url, created_at FROM feeds WHERE id = ?",
+		id,
+	).Scan(&feed.Id, &feed.Title, &feed.Url, &createdAtRaw)
+	if err != nil {
+		return nil, err
+	}
+
+	createdAt, err := time.Parse(time.RFC3339, createdAtRaw)
+	if err != nil {
+		return nil, err
+	}
+
+	feed.CreatedAt = createdAt
+
+	return &feed, nil
+}
 func (s *Repository) GetFeeds() ([]Feed, error) {
 	rows, err := s.db.Query("SELECT (id, title, url, created_at) FROM feeds")
 	feeds := []Feed{}
@@ -67,7 +109,6 @@ func (s *Repository) GetFeeds() ([]Feed, error) {
 			Id:        id,
 			Title:     title,
 			Url:       url,
-			Articles:  []FeedArticle{},
 			CreatedAt: createdAt,
 		})
 
