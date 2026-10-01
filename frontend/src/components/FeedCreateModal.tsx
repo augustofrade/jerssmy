@@ -1,5 +1,6 @@
 import { h } from 'preact';
 import { useField, UseField } from '../hooks/useField';
+import { FeedService } from '../services/FeedService';
 import { isUrl } from '../validators/is-url';
 import { Modal } from './Modal';
 
@@ -38,13 +39,19 @@ export function FeedCreateModal(props: FeedCreateModalProps) {
     props.onCancel?.();
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     const isNameValid = nameField.validate();
     const isUrlValid = urlField.validate();
 
     if (!isNameValid || !isUrlValid) {
       return;
     }
+
+    nameField.disable();
+    urlField.disable();
+    
+    const feed = await FeedService.CreateFeed({ title: nameField.value!, url: urlField.value! });
+    console.log(feed);
     props.onSubmit?.({ name: nameField.value!, url: urlField.value! });
     resetForm();
     props.onCancel?.();
@@ -88,8 +95,9 @@ export function FeedCreateModal(props: FeedCreateModalProps) {
           <div className="control">
             <input
               id="feed-name"
-              className={`input ${nameField.shouldDisplayError ? 'is-danger' : ''}`}
+              className={`input ${nameField.shouldDisplayError ? 'is-danger' : ''} ${nameField.disabled ? 'is-disabled' : ''}`}
               type="text"
+              ref={nameField.ref}
               value={nameField.value}
               onInput={(event) => handleInput(nameField, event)}
               placeholder="My Feed"
@@ -103,8 +111,9 @@ export function FeedCreateModal(props: FeedCreateModalProps) {
           <div className="control">
             <input
               id="feed-url"
-              className={`input ${urlField.shouldDisplayError ? 'is-danger' : ''}`}
+              className={`input ${urlField.shouldDisplayError ? 'is-danger' : ''} ${urlField.disabled ? 'is-disabled' : ''}`}
               type="url"
+              ref={urlField.ref}
               value={urlField.value}
               onInput={(event) => handleInput(urlField, event)}
               placeholder="https://example.com/feed.xml"
