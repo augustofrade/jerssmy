@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { MutableRef, useRef, useState } from 'preact/hooks';
 
 /**
  * Type definition for a validation rule used in the useField hook.
@@ -98,6 +98,10 @@ export interface UseField<TValue = string> {
    */
   shouldDisplayError: boolean;
   /**
+   * A mutable reference to the underlying HTML input element associated with the field, if any.
+   */
+  ref: MutableRef<HTMLInputElement | null>;
+  /**
    * Marks the field as touched (user interaction).
    */
   markAsTouched: () => void;
@@ -105,6 +109,23 @@ export interface UseField<TValue = string> {
    * Marks the field as dirty (user modification/input).
    */
   markAsDirty: () => void;
+  /**
+   * Toggles the enabled/disabled state of the field. Only works if the field is associated with an HTML element through the `ref` property.
+   */
+  toggle: () => void;
+  /**
+   * Disables the field. Only works if the field is associated with an HTML element through the `ref` property.
+   */
+  disable: () => void;
+  /**
+   * Enables the field. Only works if the field is associated with an HTML element through the `ref` property.
+   */
+  enable: () => void;
+  /**
+   * Indicates whether the field is currently disabled.
+   * If no HTML element is associated with the field through the `ref` property, this will always be `false`.
+   */
+  disabled: boolean;
 }
 
 /**
@@ -116,6 +137,8 @@ export function useField<TValue = string>(options: UseFieldOptions<TValue>): Use
   const { initialValue, validations, required } = options;
   const [value, setValue] = useState(initialValue);
   const [fieldState, setFieldState] = useState(FormState.Untouched);
+
+  const fieldRef = useRef<HTMLInputElement | null>(null);
 
   function collectErrors(nextValue: TValue | undefined): Set<string> {
     const nextErrors: Set<string> = new Set();
@@ -166,6 +189,7 @@ export function useField<TValue = string>(options: UseFieldOptions<TValue>): Use
   return {
     value,
     state: fieldState,
+    ref: fieldRef,
     dirty: fieldState === FormState.Dirty,
     touched: fieldState === FormState.Touched,
     errors,
@@ -180,5 +204,21 @@ export function useField<TValue = string>(options: UseFieldOptions<TValue>): Use
     hasError: (code: string) => errors.has(code),
     markAsTouched: () => setFieldState(FormState.Touched),
     markAsDirty: () => setFieldState(FormState.Dirty),
+    toggle: () => {
+      if (fieldRef.current) {
+        fieldRef.current.disabled = !fieldRef.current.disabled;
+      }
+    },
+    disable: () => {
+      if (fieldRef.current) {
+        fieldRef.current.disabled = true;
+      }
+    },
+    enable: () => {
+      if (fieldRef.current) {
+        fieldRef.current.disabled = false;
+      }
+    },
+    disabled: fieldRef.current ? fieldRef.current.disabled : false,
   };
 }
