@@ -4,6 +4,8 @@ import {feed} from '../models';
 
 export function CreateFeed(arg1:string,arg2:string):Promise<feed.Feed>;
 
+export function GetFeedById(arg1:number):Promise<feed.Feed>;
+
 export function Greet(arg1:string):Promise<string>;
 
 export function ListFeeds():Promise<Array<feed.Feed>>;

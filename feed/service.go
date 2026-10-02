@@ -22,6 +22,10 @@ func NewService(repo *Repository) *Service {
 	}
 }
 
+func (s *Service) GetFeedByID(id int) (*Feed, error) {
+	return s.repo.GetFeedByID(int64(id))
+}
+
 func (s *Service) CreateFeed(title string, url string) (*Feed, error) {
 	title = strings.TrimSpace(title)
 

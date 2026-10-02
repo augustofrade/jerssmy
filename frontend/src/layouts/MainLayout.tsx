@@ -1,10 +1,19 @@
-import { Fragment, h } from 'preact';
-import { Link } from 'preact-router/match';
+import { ComponentChildren, Fragment, FunctionComponent, h } from 'preact';
+import { Link, Match } from 'preact-router/match';
 import { useEffect, useState } from 'preact/hooks';
 import { feed } from '../../wailsjs/go/models';
 import { FeedCreateModal } from '../components/FeedCreateModal';
 import { useModal } from '../hooks/useModal';
 import { FeedService } from '../services/FeedService';
+
+type MatchLinkProps = {
+  href: string;
+  className?: string;
+  activeClassName?: string;
+  children?: ComponentChildren;
+};
+
+const MatchLink = Link as unknown as FunctionComponent<MatchLinkProps>;
 
 export function MainLayout(props: any) {
   const [feeds, setFeeds] = useState<feed.Feed[]>([]);
@@ -44,7 +53,15 @@ export function MainLayout(props: any) {
         <div className="menu p-5" style={{ backgroundColor: "#e1e1e1", height: "100%" }}>
           <p className="menu-label">General</p>
           <ul className="menu-list">
-            <li><Link activeClassName="is-active" path="/">Home</Link></li>
+            <li>
+              <Match>
+                {({ url }: { url?: string }) => (
+                  <MatchLink className={url === '/' ? 'is-active' : undefined} href="/">
+                    Home
+                  </MatchLink>
+                )}
+              </Match>
+            </li>
           </ul>
           <div className="menu-label">
             <div className="level">
@@ -65,9 +82,9 @@ export function MainLayout(props: any) {
           <ul className="menu-list">
             {feeds.map(f => (
               <li key={f.Id}>
-                <Link activeClassName="is-active" path={`/feeds/${f.Id}`}>
+                <MatchLink activeClassName="is-active" href={`/feeds/${f.Id}`}>
                   {f.Title}
-                </Link>
+                </MatchLink>
               </li>
             ))}
           </ul>

@@ -46,3 +46,7 @@ func (a *App) CreateFeed(title, url string) (*feed.Feed, error) {
 func (a *App) ListFeeds() ([]feed.Feed, error) {
 	return a.feedService.ListFeeds()
 }
+
+func (a *App) GetFeedById(id int) (*feed.Feed, error) {
+	return a.feedService.GetFeedByID(id)
+}

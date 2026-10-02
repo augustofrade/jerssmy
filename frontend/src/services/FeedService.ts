@@ -1,4 +1,4 @@
-import { CreateFeed, ListFeeds } from "../../wailsjs/go/main/App";
+import { CreateFeed, GetFeedById, ListFeeds } from "../../wailsjs/go/main/App";
 import { feed } from "../../wailsjs/go/models";
 
 export class FeedService {
@@ -12,4 +12,11 @@ export class FeedService {
   public static ListFeeds(): Promise<feed.Feed[]> {
     return ListFeeds();
   }
+
+  public static GetFeedById(id: number): Promise<feed.Feed> {
+    console.log("ok");
+    return GetFeedById(id);
+  }
+
+  public static GetStoredFeeds() {}
 }
