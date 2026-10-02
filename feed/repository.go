@@ -85,12 +85,14 @@ func (s *Repository) GetFeedByID(id int64) (*Feed, error) {
 	return &feed, nil
 }
 func (s *Repository) GetFeeds() ([]Feed, error) {
-	rows, err := s.db.Query("SELECT (id, title, url, created_at) FROM feeds")
+	rows, err := s.db.Query("SELECT id, title, url, created_at FROM feeds")
 	feeds := []Feed{}
 
 	if err != nil {
 		return feeds, err
 	}
+
+	defer rows.Close()
 
 	for rows.Next() {
 		var id int64
@@ -119,4 +121,19 @@ func (s *Repository) GetFeeds() ([]Feed, error) {
 	}
 
 	return feeds, nil
+}
+
+func (s *Repository) GetFeedIDByUrl(url string) (int, error) {
+	var id int
+
+	err := s.db.QueryRow("SELECT id FROM feeds WHERE url = ?", url).Scan(&id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, ErrFeedNotFound
+		}
+		return 0, err
+	}
+
+	return id, nil
+
 }

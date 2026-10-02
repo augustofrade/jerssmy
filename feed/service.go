@@ -9,6 +9,7 @@ import (
 var (
 	ErrFeedTitleIsEmpty error = errors.New("The title of a feed can't be empty")
 	ErrFeedUrlIsEmpty   error = errors.New("The URL of a feed can't be empty")
+	ErrFeedExists       error = errors.New("The feed URL was already registred")
 )
 
 type Service struct {
@@ -22,14 +23,22 @@ func NewService(repo *Repository) *Service {
 }
 
 func (s *Service) CreateFeed(title string, url string) (*Feed, error) {
-	title = strings.Trim(title, "")
+	title = strings.TrimSpace(title)
 
 	if len(title) == 0 {
 		return nil, ErrFeedTitleIsEmpty
 	}
-	url = strings.Trim(url, "")
+	url = strings.TrimSpace(url)
 	if len(url) == 0 {
 		return nil, ErrFeedUrlIsEmpty
+	}
+
+	urlInUse, err := s.FeedExists(url)
+	if err != nil {
+		return nil, err
+	}
+	if urlInUse {
+		return nil, ErrFeedExists
 	}
 
 	f := Feed{
@@ -38,7 +47,7 @@ func (s *Service) CreateFeed(title string, url string) (*Feed, error) {
 		CreatedAt: time.Now().UTC(),
 	}
 
-	err := s.repo.CreateFeed(&f)
+	err = s.repo.CreateFeed(&f)
 	return &f, err
 }
 
@@ -58,6 +67,19 @@ func (s *Service) RemoveFeed(id int) error {
 
 func (s *Service) ListFeeds() ([]Feed, error) {
 	return s.repo.GetFeeds()
+}
+
+func (s *Service) FeedExists(url string) (bool, error) {
+	_, err := s.repo.GetFeedIDByUrl(url)
+
+	if err != nil {
+		if errors.Is(err, ErrFeedNotFound) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
 }
 
 type UpdateFeedOptions struct {
