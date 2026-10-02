@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/augustofrade/jerssmy/feed"
 )
@@ -40,12 +39,10 @@ func (a *App) Greet(name string) string {
 	return fmt.Sprintf("Hello %s, It's show time!", name)
 }
 
-func (a *App) CreateFeed(title, url string) feed.Feed {
-	feed, err := a.feedService.CreateFeed(title, url)
+func (a *App) CreateFeed(title, url string) (*feed.Feed, error) {
+	return a.feedService.CreateFeed(title, url)
+}
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return *feed
+func (a *App) ListFeeds() ([]feed.Feed, error) {
+	return a.feedService.ListFeeds()
 }

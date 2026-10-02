@@ -1,4 +1,6 @@
 import { h } from 'preact';
+import { useState } from 'preact/hooks';
+import { feed } from '../../wailsjs/go/models';
 import { useField, UseField } from '../hooks/useField';
 import { FeedService } from '../services/FeedService';
 import { isUrl } from '../validators/is-url';
@@ -7,11 +9,12 @@ import { Modal } from './Modal';
 type FeedCreateModalProps = {
   isOpen: boolean;
   onCancel?: () => void;
-  onSubmit?: (values: { name: string; url: string }) => void;
+  onSubmit?: (f: feed.Feed) => void;
 };
 
 
 export function FeedCreateModal(props: FeedCreateModalProps) {
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const nameField = useField<string>({
     initialValue: '',
     required: true
@@ -49,12 +52,20 @@ export function FeedCreateModal(props: FeedCreateModalProps) {
 
     nameField.disable();
     urlField.disable();
+    setSubmitError(null);
     
-    const feed = await FeedService.CreateFeed({ title: nameField.value!, url: urlField.value! });
-    console.log(feed);
-    props.onSubmit?.({ name: nameField.value!, url: urlField.value! });
-    resetForm();
-    props.onCancel?.();
+    try {
+      const feed = await FeedService.CreateFeed({ title: nameField.value!, url: urlField.value! });
+      console.log(feed);
+      props.onSubmit?.(feed);
+      resetForm();
+      props.onCancel?.();
+    } catch (error) {
+      setSubmitError(`Submit failed: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      nameField.enable();
+      urlField.enable();
+    }
   }
 
   function getNameFieldError() {
@@ -122,6 +133,7 @@ export function FeedCreateModal(props: FeedCreateModalProps) {
           </div>
         </div>
       </div>
+      {submitError && <p className="notification is-light is-danger">{submitError}</p>}
     </Modal>
   );
 }

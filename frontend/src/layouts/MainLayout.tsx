@@ -1,23 +1,42 @@
 import { Fragment, h } from 'preact';
 import { Link } from 'preact-router/match';
+import { useEffect, useState } from 'preact/hooks';
+import { feed } from '../../wailsjs/go/models';
 import { FeedCreateModal } from '../components/FeedCreateModal';
 import { useModal } from '../hooks/useModal';
+import { FeedService } from '../services/FeedService';
 
 export function MainLayout(props: any) {
+  const [feeds, setFeeds] = useState<feed.Feed[]>([]);
+
+  useEffect(() => {
+    let isCancelled = false;
+    FeedService.ListFeeds().then(feeds => {
+      if (!isCancelled) {
+        setFeeds(feeds);
+      }
+    });
+    return () => {
+      isCancelled = true;
+    }
+  }, []);
+
   const modal = useModal({
     onCancel: () => {
       console.log("Add Feed cancelled");
     }
   });
 
+  function handleCreateFeed(f: feed.Feed) {
+    setFeeds(current => [...current, f]);
+  }
+
   return (
     <>
     <FeedCreateModal
       isOpen={modal.isOpen}
       onCancel={modal.closeModal}
-      onSubmit={(values) => {
-        console.log("Create feed", values);
-      }}
+      onSubmit={handleCreateFeed}
     />
 
     <div className="columns is-gapless m-0" style={{ minHeight: '100vh' }}>
@@ -43,6 +62,15 @@ export function MainLayout(props: any) {
               </div>
             </div>
           </div>
+          <ul className="menu-list">
+            {feeds.map(f => (
+              <li key={f.Id}>
+                <Link activeClassName="is-active" path={`/feeds/${f.Id}`}>
+                  {f.Title}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       </aside>
       <main className="column">

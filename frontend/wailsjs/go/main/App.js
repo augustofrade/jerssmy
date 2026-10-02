@@ -9,3 +9,7 @@ export function CreateFeed(arg1, arg2) {
 export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
 }
+
+export function ListFeeds() {
+  return window['go']['main']['App']['ListFeeds']();
+}
