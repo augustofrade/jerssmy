@@ -20,7 +20,7 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (s *Repository) CreateFeed(f *Feed) error {
+func (s *Repository) InsertFeed(f *Feed) error {
 	createdAtStr := f.CreatedAt.Format(time.RFC3339)
 
 	res, err := s.db.Exec("INSERT INTO feeds (title, url, created_at) VALUES (?, ?, ?)",
@@ -137,3 +137,23 @@ func (s *Repository) GetFeedIDByUrl(url string) (int, error) {
 	return id, nil
 
 }
+
+func (s *Repository) GetArticles(feedId int) ([]FeedArticle, error) {
+	rows, err := s.db.Query("SELECT title, url, publication_date, description WHERE feed_id = ?", feedId)
+
+	articles := []FeedArticle{}
+
+	for rows.Next() {
+		var a FeedArticle
+
+		rows.Scan(&a.Title, &a.Url, &a.PublicationDate, &a.Description)
+	}
+
+	if err = rows.Err(); err != nil {
+		return articles, err
+	}
+
+	return articles, nil
+}
+
+func (s *Repository) InsertArticlesBatch(a *FeedArticle) error

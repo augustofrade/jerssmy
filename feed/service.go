@@ -51,7 +51,7 @@ func (s *Service) CreateFeed(title string, url string) (*Feed, error) {
 		CreatedAt: time.Now().UTC(),
 	}
 
-	err = s.repo.CreateFeed(&f)
+	err = s.repo.InsertFeed(&f)
 	return &f, err
 }
 
@@ -84,6 +84,39 @@ func (s *Service) FeedExists(url string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (s *Service) GetStoredArticles(feedId int) ([]FeedArticleListItemDto, error) {
+	as := []FeedArticleListItemDto{}
+
+	articles, err := s.repo.GetArticles(feedId)
+	if err != nil {
+		return as, err
+	}
+
+	for _, a := range articles {
+		as = append(as, FeedArticleListItemDto{
+			Title:           a.Title,
+			Url:             a.Url,
+			PublicationDate: a.PublicationDate,
+			Description:     a.Description,
+			IsNew:           false,
+		})
+	}
+
+	return as, nil
+}
+
+func (s *Service) FetchArticles(feedId int) ([]FeedArticleListItemDto, error) {
+	_, err := s.repo.GetFeedByID(int64(feedId))
+	as := []FeedArticleListItemDto{}
+
+	if err != nil {
+		return as, err
+	}
+	// TODO: apply fetching
+
+	return as, nil
 }
 
 type UpdateFeedOptions struct {

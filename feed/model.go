@@ -14,4 +14,5 @@ type FeedArticle struct {
 	Url             string
 	PublicationDate string
 	Description     string
+	FeedId          int64
 }
