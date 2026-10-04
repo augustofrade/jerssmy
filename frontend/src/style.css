@@ -46,6 +46,23 @@ body {
     margin-bottom: 0;
 }
 
+.feed-page__article-content {
+    width: 100%;
+}
+.feed-page__article-content-label {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.feed-page__article-content-title {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 90%;
+}
+
 .notification-toast-container {
     position: fixed;
     top: 1rem;

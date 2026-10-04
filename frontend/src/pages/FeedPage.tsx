@@ -30,7 +30,7 @@ export function FeedPage(props: FeedPageProps) {
 
     try {
       const articles = await FeedService.FetchRemoteArticlesOfFeed(id);
-      setNewArticles(articles);
+      setArticleList(articles);
       notifications.close();
     } catch (error) {
       notifications.danger(`Failed to fetch remote articles: ${getErrorMessage(error)}`);
@@ -44,7 +44,7 @@ export function FeedPage(props: FeedPageProps) {
     setFeedInfo(f);
 
     const storedArticles = await FeedService.GetStoredArticlesOfFeed(f.Id);
-    setNewArticles(storedArticles);
+    setArticleList(storedArticles);
 
     await fetchRemoteArticles(f.Id);
   }
@@ -58,8 +58,14 @@ export function FeedPage(props: FeedPageProps) {
     await getAllArticles(id);
   }
 
-  function setNewArticles(articles: feed.FeedArticleListItemDto[]) {
-    setArticles(curr => [...curr, ...articles]);//.sort((a, b) => b.PublicationDate - a.PublicationDate));
+  async function handleArticleClick(article: feed.FeedArticleListItemDto) {
+    article.Read = true;
+    article.IsNew = false;
+    setArticleList([article]);
+  }
+
+  function setArticleList(articles: feed.FeedArticleListItemDto[]) {
+    setArticles(curr => [...curr, ...articles].sort((a, b) => b.PublicationDate - a.PublicationDate));
   }
 
   useEffect(() => {
@@ -93,10 +99,15 @@ export function FeedPage(props: FeedPageProps) {
       </nav>
       <section class="panel feed-page__articles is-flex-grow-1">
         {articles.map(article => (
-          <a class="panel-block" key={article.Url}>
-            <div>
-              <p class="has-text-weight-semibold">{article.Title}</p>
-              <p class="is-size-7">{new Date(article.PublicationDate * 1000).toLocaleString()}</p>
+          <a class="panel-block" key={article.Url} onClick={() => handleArticleClick(article)}>
+            <div class="feed-page__article-content">
+              <span class="feed-page__article-content-label">
+                <p class={`feed-page__article-content-title ${article.Read ? '' : 'has-text-weight-semibold'}`}>
+                  {article.Title}
+                </p>
+                {article.IsNew && <span class="tag is-link is-light">New</span>}
+              </span>
+              <p class="is-size-7">{new Date(article.PublicationDate).toLocaleString()}</p>
             </div>
           </a>
         ))}
