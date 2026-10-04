@@ -17,6 +17,8 @@ func InitSchema(db *sql.DB) error {
 			url TEXT NOT NULL UNIQUE,
 			publication_date TEXT NOT NULL,
 			description TEXT NOT NULL,
+			author TEXT,
+			thumbnail TEXT,
 			read INTEGER NOT NULL DEFAULT 0,
 			feed_id INTEGER NOT NULL,
 

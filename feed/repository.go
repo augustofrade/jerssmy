@@ -239,16 +239,16 @@ func (s *Repository) InsertArticlesBatch(fas []FeedArticle) error {
 	}
 
 	var b strings.Builder
-	b.WriteString("INSERT INTO feed_articles (title, url, publication_date, description, feed_id) VALUES ")
+	b.WriteString("INSERT INTO feed_articles (title, url, publication_date, description, author, thumbnail, feed_id) VALUES ")
 
-	args := make([]any, 0, len(fas)*5)
+	args := make([]any, 0, len(fas)*7)
 
 	for i, a := range fas {
 		if i > 0 {
 			b.WriteByte(',')
 		}
-		b.WriteString("(?, ?, ?, ?, ?)")
-		args = append(args, a.Title, a.Url, a.PublicationDate, a.Description, a.FeedId)
+		b.WriteString("(?, ?, ?, ?, ?, ?, ?)")
+		args = append(args, a.Title, a.Url, a.PublicationDate, a.Description, a.Author, a.Thumbnail, a.FeedId)
 	}
 
 	_, err := s.db.Exec(b.String(), args...)

@@ -16,12 +16,22 @@ type atomLink struct {
 	Href string `xml:"href,attr"`
 }
 
+type atomEntryThumbnail struct {
+	Url string `xml:"url,attr"`
+}
+
+type atomEntryAuthor struct {
+	Name string `xml:"name"`
+}
+
 type atomEntry struct {
-	XMLName   xml.Name `xml:"entry"`
-	Title     string   `xml:"title"`
-	Published string   `xml:"published"`
-	Summary   string   `xml:"summary"`
-	Link      atomLink `xml:"link"`
+	XMLName   xml.Name           `xml:"entry"`
+	Title     string             `xml:"title"`
+	Published string             `xml:"published"`
+	Summary   string             `xml:"summary"`
+	Author    atomEntryAuthor    `xml:"author"`
+	Thumbnail atomEntryThumbnail `xml:"thumbnail"`
+	Link      atomLink           `xml:"link"`
 }
 
 type rss struct {
@@ -36,12 +46,18 @@ type rssChannel struct {
 	Articles []rssItem `xml:"item"`
 }
 
+type rssItemThumbnail struct {
+	Url string `xml:"url,attr"`
+}
+
 type rssItem struct {
-	XMLName         xml.Name `xml:"item"`
-	Title           string   `xml:"title"`
-	Link            string   `xml:"link"`
-	PublicationDate string   `xml:"pubDate"`
-	Description     string   `xml:"description"`
+	XMLName         xml.Name         `xml:"item"`
+	Title           string           `xml:"title"`
+	Link            string           `xml:"link"`
+	PublicationDate string           `xml:"pubDate"`
+	Description     string           `xml:"description"`
+	Author          string           `xml:"creator"`
+	Thumbnail       rssItemThumbnail `xml:"content"`
 }
 
 func decodeRss(data []byte) (*rss, error) {

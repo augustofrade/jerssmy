@@ -16,5 +16,7 @@ type FeedArticle struct {
 	PublicationDate time.Time
 	Description     string
 	FeedId          int64
+	Author          string
+	Thumbnail       string
 	Read            bool
 }

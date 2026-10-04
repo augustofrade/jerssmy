@@ -28,6 +28,8 @@ type FeedArticle struct {
 	Url             string
 	PublicationDate time.Time
 	Description     string
+	Thumbnail       string
+	Author          string
 }
 
 // Fetches the XML at url and returns it as []byte
@@ -118,6 +120,8 @@ func getRssArticles(data []byte) (iter.Seq[FeedArticle], error) {
 				Url:             item.Link,
 				PublicationDate: pubDate,
 				Description:     item.Description,
+				Author:          item.Author,
+				Thumbnail:       item.Thumbnail.Url,
 			}
 
 			if !yield(fa) {
@@ -143,6 +147,8 @@ func getAtomArticles(data []byte) (iter.Seq[FeedArticle], error) {
 				Url:             item.Link.Href,
 				PublicationDate: pubDate,
 				Description:     item.Summary,
+				Author:          item.Author.Name,
+				Thumbnail:       item.Thumbnail.Url,
 			}
 
 			if !yield(fa) {

@@ -150,6 +150,8 @@ func (s *Service) FetchRemoteArticles(feedId int) ([]FeedArticleListItemDto, err
 			Url:             a.Url,
 			Description:     a.Description,
 			PublicationDate: a.PublicationDate,
+			Author:          a.Author,
+			Thumbnail:       a.Thumbnail,
 			FeedId:          f.Id,
 		}
 	}
