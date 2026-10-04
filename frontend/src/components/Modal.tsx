@@ -8,6 +8,9 @@ export interface ModalProps {
   cancelText?: string;
   primaryActionText?: string;
   onPrimaryAction?: () => void;
+  showFooter?: boolean;
+  cardClassName?: string;
+  bodyClassName?: string;
 }
 
 export function Modal(props: ModalProps) {
@@ -15,10 +18,12 @@ export function Modal(props: ModalProps) {
     return null;
   }
 
+	const shouldRenderFooter = props.showFooter !== false && (props.onPrimaryAction || props.onCancel);
+
   return (
     <div className="modal is-active">
       <div className="modal-background" onClick={props.onCancel}></div>
-      <div className="modal-card">
+      <div className={`modal-card ${props.cardClassName ?? ''}`.trim()}>
         <header className="modal-card-head">
           <p className="modal-card-title">{props.title}</p>
           {
@@ -26,10 +31,10 @@ export function Modal(props: ModalProps) {
             <button className="delete" aria-label="close" onClick={props.onCancel}></button>
           }
         </header>
-        <section className="modal-card-body">
+        <section className={`modal-card-body ${props.bodyClassName ?? ''}`.trim()}>
           {props.children}
         </section>
-        <footer className="modal-card-foot">
+        {shouldRenderFooter && <footer className="modal-card-foot">
           <div className="buttons">
             {
               props.onPrimaryAction &&
@@ -44,7 +49,7 @@ export function Modal(props: ModalProps) {
                 </button>
             }
           </div>
-        </footer>
+        </footer>}
       </div>
     </div>
   )

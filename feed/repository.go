@@ -142,7 +142,7 @@ func (s *Repository) GetFeedIDByUrl(url string) (int, error) {
 }
 
 func (s *Repository) GetArticles(feedId int) ([]FeedArticle, error) {
-	rows, err := s.db.Query("SELECT title, url, publication_date, description, read FROM feed_articles WHERE feed_id = ?", feedId)
+	rows, err := s.db.Query("SELECT title, url, publication_date, description, author, thumbnail, read FROM feed_articles WHERE feed_id = ?", feedId)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +154,7 @@ func (s *Repository) GetArticles(feedId int) ([]FeedArticle, error) {
 		var a FeedArticle
 		var publicationDateRaw string
 
-		if err := rows.Scan(&a.Title, &a.Url, &publicationDateRaw, &a.Description, &a.Read); err != nil {
+		if err := rows.Scan(&a.Title, &a.Url, &publicationDateRaw, &a.Description, &a.Author, &a.Thumbnail, &a.Read); err != nil {
 			return nil, err
 		}
 

@@ -2,7 +2,9 @@ import { Fragment, h } from 'preact';
 import { route } from 'preact-router';
 import { useEffect, useState } from 'preact/hooks';
 import { feed } from '../../wailsjs/go/models';
+import { FeedArticleDetailsModal } from '../components/FeedArticleDetailsModal';
 import { NotificationToast } from '../components/NotificationToast';
+import { useModal } from '../hooks/useModal';
 import { useNotification } from '../hooks/useNotification';
 import { FeedService } from '../services/FeedService';
 
@@ -14,8 +16,12 @@ type FeedPageProps = {
 export function FeedPage(props: FeedPageProps) {
   const [feedInfo, setFeedInfo] = useState<feed.Feed | null>(null);
   const [articles, setArticles] = useState<feed.FeedArticleListItemDto[]>([]);
+  const [selectedArticle, setSelectedArticle] = useState<feed.FeedArticleListItemDto | null>(null);
   const [isFetchingRemote, setIsFetchingRemote] = useState(false);
   const notifications = useNotification();
+  const articleModal = useModal({
+    onCancel: () => setSelectedArticle(null)
+  });
 
   function getErrorMessage(error: unknown) {
     if (error instanceof Error) {
@@ -59,6 +65,9 @@ export function FeedPage(props: FeedPageProps) {
   }
 
   async function handleArticleClick(article: feed.FeedArticleListItemDto) {
+    setSelectedArticle(article);
+    articleModal.openModal();
+
     if(article.Read) return;
 
     article.Read = true;
@@ -76,11 +85,17 @@ export function FeedPage(props: FeedPageProps) {
   useEffect(() => {
     setFeedInfo(null);
     setArticles([]);
+    setSelectedArticle(null);
     handlePageInit();
   }, [props.id]);
 
   return (
     <div class="feed-page is-flex is-flex-direction-column">
+      <FeedArticleDetailsModal
+		article={selectedArticle}
+		isOpen={articleModal.isOpen}
+		onCancel={articleModal.closeModal}
+	  />
       <NotificationToast
         notification={notifications.notification}
         onClose={notifications.close}

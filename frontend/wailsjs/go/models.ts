@@ -42,6 +42,8 @@ export namespace feed {
 	    Url: string;
 	    // Go type: time
 	    PublicationDate: any;
+	    Author: string;
+	    Thumbnail: string;
 	    Description: string;
 	    IsNew: boolean;
 	    Read: boolean;
@@ -55,6 +57,8 @@ export namespace feed {
 	        this.Title = source["Title"];
 	        this.Url = source["Url"];
 	        this.PublicationDate = this.convertValues(source["PublicationDate"], null);
+	        this.Author = source["Author"];
+	        this.Thumbnail = source["Thumbnail"];
 	        this.Description = source["Description"];
 	        this.IsNew = source["IsNew"];
 	        this.Read = source["Read"];
