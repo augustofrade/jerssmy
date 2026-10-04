@@ -59,9 +59,14 @@ export function FeedPage(props: FeedPageProps) {
   }
 
   async function handleArticleClick(article: feed.FeedArticleListItemDto) {
+    if(article.Read) return;
+
     article.Read = true;
     article.IsNew = false;
-    setArticleList([article]);
+
+    await FeedService.MarkArticleAsRead(article.Url);
+
+    setArticles(curr => [...curr]);
   }
 
   function setArticleList(articles: feed.FeedArticleListItemDto[]) {

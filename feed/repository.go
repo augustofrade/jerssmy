@@ -9,7 +9,8 @@ import (
 )
 
 var (
-	ErrFeedNotFound error = errors.New("Feed not found")
+	ErrFeedNotFound    error = errors.New("Feed not found")
+	ErrArticleNotFound error = errors.New("Article not found")
 )
 
 type Repository struct {
@@ -141,7 +142,7 @@ func (s *Repository) GetFeedIDByUrl(url string) (int, error) {
 }
 
 func (s *Repository) GetArticles(feedId int) ([]FeedArticle, error) {
-	rows, err := s.db.Query("SELECT title, url, publication_date, description FROM feed_articles WHERE feed_id = ?", feedId)
+	rows, err := s.db.Query("SELECT title, url, publication_date, description, read FROM feed_articles WHERE feed_id = ?", feedId)
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +154,7 @@ func (s *Repository) GetArticles(feedId int) ([]FeedArticle, error) {
 		var a FeedArticle
 		var publicationDateRaw string
 
-		if err := rows.Scan(&a.Title, &a.Url, &publicationDateRaw, &a.Description); err != nil {
+		if err := rows.Scan(&a.Title, &a.Url, &publicationDateRaw, &a.Description, &a.Read); err != nil {
 			return nil, err
 		}
 
@@ -252,4 +253,20 @@ func (s *Repository) InsertArticlesBatch(fas []FeedArticle) error {
 
 	_, err := s.db.Exec(b.String(), args...)
 	return err
+}
+
+func (s *Repository) MarkArticleAsRead(url string) error {
+	rows, err := s.db.Exec("UPDATE feed_articles SET read = 1 WHERE url = ?", url)
+	if err != nil {
+		return err
+	}
+	affected, err := rows.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return ErrArticleNotFound
+	}
+
+	return nil
 }

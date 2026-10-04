@@ -13,3 +13,5 @@ export function GetStoredArticles(arg1:number):Promise<Array<feed.FeedArticleLis
 export function Greet(arg1:string):Promise<string>;
 
 export function ListFeeds():Promise<Array<feed.Feed>>;
+
+export function MarkArticleAsRead(arg1:string):Promise<void>;

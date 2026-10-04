@@ -25,3 +25,7 @@ export function Greet(arg1) {
 export function ListFeeds() {
   return window['go']['main']['App']['ListFeeds']();
 }
+
+export function MarkArticleAsRead(arg1) {
+  return window['go']['main']['App']['MarkArticleAsRead'](arg1);
+}

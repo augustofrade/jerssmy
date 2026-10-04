@@ -4,6 +4,7 @@ import {
   GetFeedById,
   GetStoredArticles,
   ListFeeds,
+  MarkArticleAsRead,
 } from "../../wailsjs/go/main/App";
 import { feed } from "../../wailsjs/go/models";
 
@@ -29,5 +30,9 @@ export class FeedService {
 
   public static FetchRemoteArticlesOfFeed(feedId: number) {
     return FetchRemoteArticles(feedId);
+  }
+
+  public static MarkArticleAsRead(articleUrl: string) {
+    return MarkArticleAsRead(articleUrl);
   }
 }

@@ -193,6 +193,10 @@ func (s *Service) FetchRemoteArticles(feedId int) ([]FeedArticleListItemDto, err
 	return as, nil
 }
 
+func (s *Service) MarkArticleAsRead(url string) error {
+	return s.repo.MarkArticleAsRead(url)
+}
+
 type UpdateFeedOptions struct {
 	Title string
 }

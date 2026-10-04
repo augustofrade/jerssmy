@@ -58,3 +58,7 @@ func (a *App) GetStoredArticles(feedId int) ([]feed.FeedArticleListItemDto, erro
 func (a *App) FetchRemoteArticles(feedId int) ([]feed.FeedArticleListItemDto, error) {
 	return a.feedService.FetchRemoteArticles(feedId)
 }
+
+func (a *App) MarkArticleAsRead(url string) error {
+	return a.feedService.MarkArticleAsRead(url)
+}
