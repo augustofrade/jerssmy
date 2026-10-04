@@ -1,4 +1,10 @@
-import { CreateFeed, GetFeedById, ListFeeds } from "../../wailsjs/go/main/App";
+import {
+  CreateFeed,
+  FetchRemoteArticles,
+  GetFeedById,
+  GetStoredArticles,
+  ListFeeds,
+} from "../../wailsjs/go/main/App";
 import { feed } from "../../wailsjs/go/models";
 
 export class FeedService {
@@ -14,9 +20,14 @@ export class FeedService {
   }
 
   public static GetFeedById(id: number): Promise<feed.Feed> {
-    console.log("ok");
     return GetFeedById(id);
   }
 
-  public static GetStoredFeeds() {}
+  public static GetStoredArticlesOfFeed(feedId: number) {
+    return GetStoredArticles(feedId);
+  }
+
+  public static FetchRemoteArticlesOfFeed(feedId: number) {
+    return FetchRemoteArticles(feedId);
+  }
 }

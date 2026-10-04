@@ -4,7 +4,11 @@ import {feed} from '../models';
 
 export function CreateFeed(arg1:string,arg2:string):Promise<feed.Feed>;
 
+export function FetchRemoteArticles(arg1:number):Promise<Array<feed.FeedArticleListItemDto>>;
+
 export function GetFeedById(arg1:number):Promise<feed.Feed>;
+
+export function GetStoredArticles(arg1:number):Promise<Array<feed.FeedArticleListItemDto>>;
 
 export function Greet(arg1:string):Promise<string>;
 

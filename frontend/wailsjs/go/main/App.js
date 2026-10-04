@@ -6,8 +6,16 @@ export function CreateFeed(arg1, arg2) {
   return window['go']['main']['App']['CreateFeed'](arg1, arg2);
 }
 
+export function FetchRemoteArticles(arg1) {
+  return window['go']['main']['App']['FetchRemoteArticles'](arg1);
+}
+
 export function GetFeedById(arg1) {
   return window['go']['main']['App']['GetFeedById'](arg1);
+}
+
+export function GetStoredArticles(arg1) {
+  return window['go']['main']['App']['GetStoredArticles'](arg1);
 }
 
 export function Greet(arg1) {
