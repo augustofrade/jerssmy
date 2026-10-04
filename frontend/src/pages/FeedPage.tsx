@@ -2,6 +2,8 @@ import { Fragment, h } from 'preact';
 import { route } from 'preact-router';
 import { useEffect, useState } from 'preact/hooks';
 import { feed } from '../../wailsjs/go/models';
+import { NotificationToast } from '../components/NotificationToast';
+import { useNotification } from '../hooks/useNotification';
 import { FeedService } from '../services/FeedService';
 
 type FeedPageProps = {
@@ -13,12 +15,28 @@ export function FeedPage(props: FeedPageProps) {
   const [feedInfo, setFeedInfo] = useState<feed.Feed | null>(null);
   const [articles, setArticles] = useState<feed.FeedArticleListItemDto[]>([]);
   const [isFetchingRemote, setIsFetchingRemote] = useState(false);
+  const notifications = useNotification();
+
+  function getErrorMessage(error: unknown) {
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    return String(error);
+  }
 
   async function fetchRemoteArticles(id: number) {
     setIsFetchingRemote(true);
-    const articles = await FeedService.FetchRemoteArticlesOfFeed(id);
-    setNewArticles(articles);
-    setIsFetchingRemote(false);
+
+    try {
+      const articles = await FeedService.FetchRemoteArticlesOfFeed(id);
+      setNewArticles(articles);
+      notifications.close();
+    } catch (error) {
+      notifications.danger(`Failed to fetch remote articles: ${getErrorMessage(error)}`);
+    } finally {
+      setIsFetchingRemote(false);
+    }
   }
 
   async function getAllArticles(id: number) {
@@ -50,6 +68,10 @@ export function FeedPage(props: FeedPageProps) {
 
   return (
     <>
+      <NotificationToast
+        notification={notifications.notification}
+        onClose={notifications.close}
+      />
       <nav class="navbar px-5 py-3" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
           <span class={`navbar-item has-text-weight-semibold ${feedInfo ? '' : 'is-skeleton'}`}>

@@ -17,3 +17,16 @@ body {
 #app {
     height: 100vh;
 }
+
+.notification-toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+    width: min(28rem, calc(100vw - 2rem));
+}
+
+.notification-toast-container .notification {
+    box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.18);
+    margin-bottom: 0;
+}

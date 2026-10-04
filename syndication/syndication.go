@@ -1,6 +1,7 @@
 package syndication
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"iter"
@@ -8,6 +9,14 @@ import (
 	"strings"
 	"time"
 )
+
+var (
+	ErrTooManyRequests error = errors.New("feed request failed: Too many requests")
+)
+
+var httpClient = &http.Client{
+	Timeout: 15 * time.Second,
+}
 
 type Feed struct {
 	Title string
@@ -23,7 +32,15 @@ type FeedArticle struct {
 
 // Fetches the XML at url and returns it as []byte
 func Fetch(url string) ([]byte, error) {
-	res, err := http.Get(url)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Accept", "application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.1")
+	req.Header.Set("User-Agent", "jerssmy/1.0 (+https://github.com/augustofrade/jerssmy)")
+
+	res, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -35,9 +52,17 @@ func Fetch(url string) ([]byte, error) {
 		return nil, err
 	}
 
+	if res.StatusCode == http.StatusTooManyRequests {
+		return nil, ErrTooManyRequests
+	}
+
+	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusMultipleChoices {
+		return nil, fmt.Errorf("feed request failed: %s", res.Status)
+	}
+
 	contentType := res.Header.Get("content-type")
 	if !strings.Contains(contentType, "xml") {
-		return nil, fmt.Errorf("invalid content type: %s", contentType)
+		return nil, fmt.Errorf("feed request failed: invalid content type '%s'", contentType)
 	}
 
 	return body, nil
