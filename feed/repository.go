@@ -142,12 +142,27 @@ func (s *Repository) GetFeedIDByUrl(url string) (int, error) {
 
 func (s *Repository) GetArticles(feedId int) ([]FeedArticle, error) {
 	rows, err := s.db.Query("SELECT title, url, publication_date, description FROM feed_articles WHERE feed_id = ?", feedId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
 	articles := []FeedArticle{}
 
 	for rows.Next() {
 		var a FeedArticle
-		rows.Scan(&a.Title, &a.Url, &a.PublicationDate, &a.Description)
+		var publicationDateRaw string
+
+		if err := rows.Scan(&a.Title, &a.Url, &publicationDateRaw, &a.Description); err != nil {
+			return nil, err
+		}
+
+		publicationDate, err := parsePublicationDate(publicationDateRaw)
+		if err != nil {
+			return nil, err
+		}
+
+		a.PublicationDate = publicationDate
 		articles = append(articles, a)
 	}
 
@@ -156,6 +171,17 @@ func (s *Repository) GetArticles(feedId int) ([]FeedArticle, error) {
 	}
 
 	return articles, nil
+}
+
+func parsePublicationDate(value string) (time.Time, error) {
+	const layout = "2006-01-02 15:04:05-07:00"
+
+	parsed, err := time.Parse(layout, value)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("invalid publication date %q: %w", value, err)
+	}
+
+	return parsed, nil
 }
 
 func (s *Repository) GetMissingArticleUrls(feedId int, urls []string) ([]string, error) {

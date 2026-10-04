@@ -111,7 +111,7 @@ func getRssArticles(data []byte) (iter.Seq[FeedArticle], error) {
 
 	return func(yield func(FeedArticle) bool) {
 		for _, item := range root.Channel.Articles {
-			pubDate, _ := time.Parse(item.PublicationDate, "Mon, 02 Jan 2006 15:04:05 -0700")
+			pubDate, _ := time.Parse(time.RFC1123Z, item.PublicationDate)
 
 			fa := FeedArticle{
 				Title:           item.Title,
@@ -136,7 +136,7 @@ func getAtomArticles(data []byte) (iter.Seq[FeedArticle], error) {
 
 	return func(yield func(FeedArticle) bool) {
 		for _, item := range root.Entries {
-			pubDate, _ := time.Parse(item.Published, "2006-01-02T15:04:05-07:00")
+			pubDate, _ := time.Parse(time.RFC3339, item.Published)
 
 			fa := FeedArticle{
 				Title:           item.Title,
