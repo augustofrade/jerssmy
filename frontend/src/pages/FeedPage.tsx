@@ -67,7 +67,7 @@ export function FeedPage(props: FeedPageProps) {
   }, []);
 
   return (
-    <>
+    <div class="feed-page is-flex is-flex-direction-column">
       <NotificationToast
         notification={notifications.notification}
         onClose={notifications.close}
@@ -91,7 +91,7 @@ export function FeedPage(props: FeedPageProps) {
           </div>
         </div>
       </nav>
-      <section class="panel">
+      <section class="panel feed-page__articles is-flex-grow-1">
         {articles.map(article => (
           <a class="panel-block" key={article.Url}>
             <div>
@@ -101,6 +101,6 @@ export function FeedPage(props: FeedPageProps) {
           </a>
         ))}
       </section>
-    </>
+    </div>
   )
 }

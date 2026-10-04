@@ -48,7 +48,7 @@ export function MainLayout(props: any) {
       onSubmit={handleCreateFeed}
     />
 
-    <div className="columns is-gapless m-0" style={{ minHeight: '100vh' }}>
+    <div className="columns is-gapless m-0 app-shell">
       <aside className="column is-one-quarter">
         <div className="menu p-5" style={{ backgroundColor: "#e1e1e1", height: "100%" }}>
           <p className="menu-label">General</p>
@@ -90,7 +90,7 @@ export function MainLayout(props: any) {
           </ul>
         </div>
       </aside>
-      <main className="column">
+      <main className="column is-flex app-main-column">
         {props.children}
       </main>
     </div>
