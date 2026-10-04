@@ -74,8 +74,10 @@ export function FeedPage(props: FeedPageProps) {
   }
 
   useEffect(() => {
+    setFeedInfo(null);
+    setArticles([]);
     handlePageInit();
-  }, []);
+  }, [props.id]);
 
   return (
     <div class="feed-page is-flex is-flex-direction-column">
@@ -83,7 +85,7 @@ export function FeedPage(props: FeedPageProps) {
         notification={notifications.notification}
         onClose={notifications.close}
       />
-      <nav class="navbar px-5 py-3" role="navigation" aria-label="main navigation">
+      <nav class="navbar px-5 py-3 is-flex-direction-row is-align-items-center" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
           <span class={`navbar-item has-text-weight-semibold ${feedInfo ? '' : 'is-skeleton'}`}>
             {feedInfo?.Title ?? 'Feed Title'}

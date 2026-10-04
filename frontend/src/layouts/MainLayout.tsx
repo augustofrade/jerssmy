@@ -50,7 +50,7 @@ export function MainLayout(props: any) {
 
     <div className="columns is-gapless m-0 app-shell">
       <aside className="column is-one-quarter">
-        <div className="menu p-5" style={{ backgroundColor: "#e1e1e1", height: "100%" }}>
+        <div className="menu p-5" style={{ backgroundColor: "var(--bulma-link-95)", height: "100%" }}>
           <p className="menu-label">General</p>
           <ul className="menu-list">
             <li>
