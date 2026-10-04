@@ -2,8 +2,11 @@ package feed
 
 import (
 	"errors"
+	"log"
 	"strings"
 	"time"
+
+	"github.com/augustofrade/jerssmy/syndication"
 )
 
 var (
@@ -101,20 +104,91 @@ func (s *Service) GetStoredArticles(feedId int) ([]FeedArticleListItemDto, error
 			PublicationDate: a.PublicationDate,
 			Description:     a.Description,
 			IsNew:           false,
+			Read:            a.Read,
 		})
 	}
 
 	return as, nil
 }
 
-func (s *Service) FetchArticles(feedId int) ([]FeedArticleListItemDto, error) {
-	_, err := s.repo.GetFeedByID(int64(feedId))
+func (s *Service) FetchRemoteFeedData(url string) (*syndication.Feed, error) {
+	feedXml, err := syndication.Fetch(url)
+	if err != nil {
+		return nil, err
+	}
+
+	return syndication.DecodeFeed(feedXml)
+}
+
+// Fetches remote articles from a saved Feed, filters the new ones, save them on the database
+// and returns them
+func (s *Service) FetchRemoteArticles(feedId int) ([]FeedArticleListItemDto, error) {
+	f, err := s.repo.GetFeedByID(int64(feedId))
 	as := []FeedArticleListItemDto{}
 
 	if err != nil {
 		return as, err
 	}
-	// TODO: apply fetching
+
+	feedXml, err := syndication.Fetch(f.Url)
+	if err != nil {
+		return as, err
+	}
+
+	articleItr, err := syndication.DecodeArticles(feedXml)
+	if err != nil {
+		return as, err
+	}
+
+	remoteUrls := []string{}
+	remoteArticles := map[string]FeedArticle{}
+
+	for a := range articleItr {
+		remoteUrls = append(remoteUrls, a.Url)
+		remoteArticles[a.Url] = FeedArticle{
+			Title:           a.Title,
+			Url:             a.Url,
+			Description:     a.Description,
+			PublicationDate: a.PublicationDate,
+			FeedId:          f.Id,
+		}
+	}
+
+	newUrls, err := s.repo.GetMissingArticleUrls(feedId, remoteUrls)
+	if err != nil {
+		return as, nil
+	}
+
+	if len(newUrls) == 0 {
+		return as, nil
+	}
+
+	log.Println("New URLs found from remote Feed XML")
+
+	newArticles := []FeedArticle{}
+
+	for _, url := range newUrls {
+		a, ok := remoteArticles[url]
+		if !ok {
+			// just to be sure
+			continue
+		}
+
+		newArticles = append(newArticles, a)
+		as = append(as, FeedArticleListItemDto{
+			Title:           a.Title,
+			Description:     a.Description,
+			Url:             a.Url,
+			PublicationDate: a.PublicationDate,
+			IsNew:           true,
+			Read:            false,
+		})
+	}
+
+	err = s.repo.InsertArticlesBatch(newArticles)
+	if err != nil {
+		return nil, err
+	}
 
 	return as, nil
 }

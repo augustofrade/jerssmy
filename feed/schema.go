@@ -11,12 +11,13 @@ func InitSchema(db *sql.DB) error {
 			created_at TEXT NOT NULL
 		);
 
-		CREATE TABLE IF NOT EXISTS feed_article (
+		CREATE TABLE IF NOT EXISTS feed_articles (
 			id INTEGER PRIMARY KEY,
 			title TEXT NOT NULL,
 			url TEXT NOT NULL UNIQUE,
 			publication_date TEXT NOT NULL,
 			description TEXT NOT NULL,
+			read INTEGER NOT NULL DEFAULT 0,
 			feed_id INTEGER NOT NULL,
 
 			CONSTRAINT fk_feeds

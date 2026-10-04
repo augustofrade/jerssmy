@@ -3,6 +3,8 @@ package feed
 import (
 	"database/sql"
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 )
 
@@ -139,14 +141,14 @@ func (s *Repository) GetFeedIDByUrl(url string) (int, error) {
 }
 
 func (s *Repository) GetArticles(feedId int) ([]FeedArticle, error) {
-	rows, err := s.db.Query("SELECT title, url, publication_date, description WHERE feed_id = ?", feedId)
+	rows, err := s.db.Query("SELECT title, url, publication_date, description FROM feed_articles WHERE feed_id = ?", feedId)
 
 	articles := []FeedArticle{}
 
 	for rows.Next() {
 		var a FeedArticle
-
 		rows.Scan(&a.Title, &a.Url, &a.PublicationDate, &a.Description)
+		articles = append(articles, a)
 	}
 
 	if err = rows.Err(); err != nil {
@@ -156,4 +158,72 @@ func (s *Repository) GetArticles(feedId int) ([]FeedArticle, error) {
 	return articles, nil
 }
 
-func (s *Repository) InsertArticlesBatch(a *FeedArticle) error
+func (s *Repository) GetMissingArticleUrls(feedId int, urls []string) ([]string, error) {
+	if len(urls) == 0 {
+		return nil, nil
+	}
+
+	vals := make([]any, 0, len(urls)+1)
+	placeholders := make([]string, len(urls))
+	for i, url := range urls {
+		placeholders[i] = "(?)"
+		vals = append(vals, url)
+	}
+	vals = append(vals, feedId)
+
+	query := fmt.Sprintf(`
+		WITH input(url) AS (
+			VALUES %s
+		)
+		SELECT input.url
+		FROM input
+		WHERE NOT EXISTS (
+			SELECT 1
+			FROM feed_articles fa
+			WHERE fa.feed_id = ?
+			AND fa.url = input.url
+		)
+	`, strings.Join(placeholders, ","))
+
+	rows, err := s.db.Query(query, vals...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var missing []string
+
+	for rows.Next() {
+		var url string
+		if err := rows.Scan(&url); err != nil {
+			return nil, err
+		}
+
+		missing = append(missing, url)
+	}
+
+	return missing, rows.Err()
+
+}
+
+func (s *Repository) InsertArticlesBatch(fas []FeedArticle) error {
+	if len(fas) == 0 {
+		return nil
+	}
+
+	var b strings.Builder
+	b.WriteString("INSERT INTO feed_articles (title, url, publication_date, description, feed_id) VALUES ")
+
+	args := make([]any, 0, len(fas)*5)
+
+	for i, a := range fas {
+		if i > 0 {
+			b.WriteByte(',')
+		}
+		b.WriteString("(?, ?, ?, ?, ?)")
+		args = append(args, a.Title, a.Url, a.PublicationDate, a.Description, a.FeedId)
+	}
+
+	_, err := s.db.Exec(b.String(), args...)
+	return err
+}

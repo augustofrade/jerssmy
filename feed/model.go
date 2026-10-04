@@ -10,9 +10,11 @@ type Feed struct {
 }
 
 type FeedArticle struct {
+	Id              int64
 	Title           string
 	Url             string
-	PublicationDate string
+	PublicationDate time.Time
 	Description     string
 	FeedId          int64
+	Read            bool
 }

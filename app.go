@@ -50,3 +50,11 @@ func (a *App) ListFeeds() ([]feed.Feed, error) {
 func (a *App) GetFeedById(id int) (*feed.Feed, error) {
 	return a.feedService.GetFeedByID(id)
 }
+
+func (a *App) GetStoredArticles(feedId int) ([]feed.FeedArticleListItemDto, error) {
+	return a.feedService.GetStoredArticles(feedId)
+}
+
+func (a *App) FetchRemoteArticles(feedId int) ([]feed.FeedArticleListItemDto, error) {
+	return a.feedService.FetchRemoteArticles(feedId)
+}
