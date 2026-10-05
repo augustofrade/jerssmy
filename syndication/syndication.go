@@ -27,7 +27,8 @@ type FeedArticle struct {
 	Title           string
 	Url             string
 	PublicationDate time.Time
-	Description     string
+	Summary         string
+	Content         string
 	Thumbnail       string
 	Author          string
 }
@@ -119,7 +120,8 @@ func getRssArticles(data []byte) (iter.Seq[FeedArticle], error) {
 				Title:           item.Title,
 				Url:             item.Link,
 				PublicationDate: pubDate,
-				Description:     item.Description,
+				Summary:         item.Description,
+				Content:         item.Content,
 				Author:          item.Author,
 				Thumbnail:       item.Thumbnail.Url,
 			}
@@ -146,7 +148,8 @@ func getAtomArticles(data []byte) (iter.Seq[FeedArticle], error) {
 				Title:           item.Title,
 				Url:             item.Link.Href,
 				PublicationDate: pubDate,
-				Description:     item.Summary,
+				Summary:         item.Summary,
+				Content:         item.Content,
 				Author:          item.Author.Name,
 				Thumbnail:       item.Thumbnail.Url,
 			}

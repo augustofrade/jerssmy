@@ -44,7 +44,8 @@ export namespace feed {
 	    PublicationDate: any;
 	    Author: string;
 	    Thumbnail: string;
-	    Description: string;
+	    Summary: string;
+	    Content: string;
 	    IsNew: boolean;
 	    Read: boolean;
 	
@@ -59,7 +60,8 @@ export namespace feed {
 	        this.PublicationDate = this.convertValues(source["PublicationDate"], null);
 	        this.Author = source["Author"];
 	        this.Thumbnail = source["Thumbnail"];
-	        this.Description = source["Description"];
+	        this.Summary = source["Summary"];
+	        this.Content = source["Content"];
 	        this.IsNew = source["IsNew"];
 	        this.Read = source["Read"];
 	    }

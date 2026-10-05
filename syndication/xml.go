@@ -29,6 +29,7 @@ type atomEntry struct {
 	Title     string             `xml:"title"`
 	Published string             `xml:"published"`
 	Summary   string             `xml:"summary"`
+	Content   string             `xml:"content"`
 	Author    atomEntryAuthor    `xml:"author"`
 	Thumbnail atomEntryThumbnail `xml:"thumbnail"`
 	Link      atomLink           `xml:"link"`
@@ -56,6 +57,7 @@ type rssItem struct {
 	Link            string           `xml:"link"`
 	PublicationDate string           `xml:"pubDate"`
 	Description     string           `xml:"description"`
+	Content         string           `xml:"encoded"`
 	Author          string           `xml:"creator"`
 	Thumbnail       rssItemThumbnail `xml:"content"`
 }

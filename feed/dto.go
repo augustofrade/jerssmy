@@ -8,7 +8,8 @@ type FeedArticleListItemDto struct {
 	PublicationDate time.Time
 	Author          string
 	Thumbnail       string
-	Description     string
+	Summary         string
+	Content         string
 	IsNew           bool
 	Read            bool
 }

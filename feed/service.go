@@ -104,7 +104,8 @@ func (s *Service) GetStoredArticles(feedId int) ([]FeedArticleListItemDto, error
 			PublicationDate: a.PublicationDate,
 			Author:          a.Author,
 			Thumbnail:       a.Thumbnail,
-			Description:     a.Description,
+			Summary:         a.Summary,
+			Content:         a.Content,
 			IsNew:           false,
 			Read:            a.Read,
 		})
@@ -150,7 +151,8 @@ func (s *Service) FetchRemoteArticles(feedId int) ([]FeedArticleListItemDto, err
 		remoteArticles[a.Url] = FeedArticle{
 			Title:           a.Title,
 			Url:             a.Url,
-			Description:     a.Description,
+			Summary:         a.Summary,
+			Content:         a.Content,
 			PublicationDate: a.PublicationDate,
 			Author:          a.Author,
 			Thumbnail:       a.Thumbnail,
@@ -181,7 +183,8 @@ func (s *Service) FetchRemoteArticles(feedId int) ([]FeedArticleListItemDto, err
 		newArticles = append(newArticles, a)
 		as = append(as, FeedArticleListItemDto{
 			Title:           a.Title,
-			Description:     a.Description,
+			Summary:         a.Summary,
+			Content:         a.Content,
 			Url:             a.Url,
 			PublicationDate: a.PublicationDate,
 			Author:          a.Author,
