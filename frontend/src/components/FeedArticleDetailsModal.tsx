@@ -1,5 +1,6 @@
 import { h } from 'preact';
 import { feed } from '../../wailsjs/go/models';
+import { BrowserOpenURL } from '../../wailsjs/runtime/runtime';
 import { Modal } from './Modal';
 
 type FeedArticleDetailsModalProps = {
@@ -22,6 +23,30 @@ export function FeedArticleDetailsModal(props: FeedArticleDetailsModalProps) {
 		return null;
 	}
 
+  function handleContentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement | null;
+    const link = target?.closest('a');
+
+    if (!link) {
+      return;
+    }
+
+    const href = link.getAttribute('href');
+    if (!href) {
+      return;
+    }
+
+    const url = new URL(href, window.location.href);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    BrowserOpenURL(url.toString());
+  }
+
 	return (
 		<Modal
 			title={props.article.Title}
@@ -38,7 +63,11 @@ export function FeedArticleDetailsModal(props: FeedArticleDetailsModalProps) {
 						<img src={props.article.Thumbnail} alt={props.article.Title} />
 					</figure>
 				)}
-				<div className="feed-article-modal-rich-content" dangerouslySetInnerHTML={{ __html: props.article.Content }} />
+				<div
+          className="feed-article-modal-rich-content"
+          onClick={handleContentClick}
+          dangerouslySetInnerHTML={{ __html: props.article.Content }}
+        />
 			</div>
 		</Modal>
 	);
