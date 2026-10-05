@@ -39,8 +39,7 @@ export function FeedArticleDetailsModal(props: FeedArticleDetailsModalProps) {
 						<img src={props.article.Thumbnail} alt={props.article.Title} />
 					</figure>
 				)}
-				{props.article.IsNew && <span className="tag is-link is-light">New</span>}
-				<div dangerouslySetInnerHTML={{ __html: props.article.Description }} />
+				<div dangerouslySetInnerHTML={{ __html: props.article.Content }} />
 			</div>
 		</Modal>
 	);

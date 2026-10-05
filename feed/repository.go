@@ -142,7 +142,7 @@ func (s *Repository) GetFeedIDByUrl(url string) (int, error) {
 }
 
 func (s *Repository) GetArticles(feedId int) ([]FeedArticle, error) {
-	rows, err := s.db.Query("SELECT title, url, publication_date, description, author, thumbnail, read FROM feed_articles WHERE feed_id = ?", feedId)
+	rows, err := s.db.Query("SELECT title, url, publication_date, summary, author, thumbnail, content, read FROM feed_articles WHERE feed_id = ?", feedId)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +154,7 @@ func (s *Repository) GetArticles(feedId int) ([]FeedArticle, error) {
 		var a FeedArticle
 		var publicationDateRaw string
 
-		if err := rows.Scan(&a.Title, &a.Url, &publicationDateRaw, &a.Description, &a.Author, &a.Thumbnail, &a.Read); err != nil {
+		if err := rows.Scan(&a.Title, &a.Url, &publicationDateRaw, &a.Summary, &a.Author, &a.Thumbnail, &a.Content, &a.Read); err != nil {
 			return nil, err
 		}
 
@@ -239,16 +239,16 @@ func (s *Repository) InsertArticlesBatch(fas []FeedArticle) error {
 	}
 
 	var b strings.Builder
-	b.WriteString("INSERT INTO feed_articles (title, url, publication_date, description, author, thumbnail, feed_id) VALUES ")
+	b.WriteString("INSERT INTO feed_articles (title, url, publication_date, summary, author, thumbnail, content, feed_id) VALUES ")
 
-	args := make([]any, 0, len(fas)*7)
+	args := make([]any, 0, len(fas)*8)
 
 	for i, a := range fas {
 		if i > 0 {
 			b.WriteByte(',')
 		}
-		b.WriteString("(?, ?, ?, ?, ?, ?, ?)")
-		args = append(args, a.Title, a.Url, a.PublicationDate, a.Description, a.Author, a.Thumbnail, a.FeedId)
+		b.WriteString("(?, ?, ?, ?, ?, ?, ?, ?)")
+		args = append(args, a.Title, a.Url, a.PublicationDate, a.Summary, a.Author, a.Thumbnail, a.Content, a.FeedId)
 	}
 
 	_, err := s.db.Exec(b.String(), args...)
