@@ -85,6 +85,8 @@ body {
 
 .feed-article-modal-body {
     overflow-y: auto;
+    border-bottom-left-radius: var(--bulma-radius-large);
+    border-bottom-right-radius: var(--bulma-radius-large);
 }
 
 .feed-article-modal-thumbnail {
@@ -97,4 +99,31 @@ body {
     max-height: 24rem;
     object-fit: cover;
     border-radius: 0.5rem;
+}
+
+.feed-article-modal-rich-content {
+    overflow-x: hidden;
+}
+
+.feed-article-modal-rich-content img,
+.feed-article-modal-rich-content video,
+.feed-article-modal-rich-content iframe,
+.feed-article-modal-rich-content canvas,
+.feed-article-modal-rich-content svg {
+    max-width: 100% !important;
+    height: auto !important;
+    border-radius: var(--bulma-radius-large);
+}
+
+.feed-article-modal-rich-content figure,
+.feed-article-modal-rich-content table,
+.feed-article-modal-rich-content pre,
+.feed-article-modal-rich-content div {
+    max-width: 100% !important;
+    border-radius: var(--bulma-radius-large);
+}
+
+.feed-article-modal-rich-content figure {
+    margin-left: 0;
+    margin-right: 0;
 }

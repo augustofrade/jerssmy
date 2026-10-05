@@ -31,15 +31,14 @@ export function FeedArticleDetailsModal(props: FeedArticleDetailsModalProps) {
 			cardClassName="feed-article-modal-card"
 			bodyClassName="feed-article-modal-body"
 		>
-			<div className="content">
-				<h2 className="title is-4">{props.article.Title}</h2>
-				<p className="is-size-7 has-text-grey">{formatArticleMeta(props.article)}</p>
+			<div className="content feed-article-modal-content">
+				<p className="is-size-6 has-text-weight-semibold has-text-grey">{formatArticleMeta(props.article)}</p>
 				{props.article.Thumbnail && (
 					<figure className="feed-article-modal-thumbnail image">
 						<img src={props.article.Thumbnail} alt={props.article.Title} />
 					</figure>
 				)}
-				<div dangerouslySetInnerHTML={{ __html: props.article.Content }} />
+				<div className="feed-article-modal-rich-content" dangerouslySetInnerHTML={{ __html: props.article.Content }} />
 			</div>
 		</Modal>
 	);
