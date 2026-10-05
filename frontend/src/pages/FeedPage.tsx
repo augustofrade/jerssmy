@@ -82,11 +82,29 @@ export function FeedPage(props: FeedPageProps) {
     setArticles(curr => [...curr, ...articles].sort((a, b) => b.PublicationDate - a.PublicationDate));
   }
 
+  function closeArticleModal() {
+    setSelectedArticle(null);
+    articleModal.closeModal();
+  }
+
   useEffect(() => {
     setFeedInfo(null);
     setArticles([]);
     setSelectedArticle(null);
+
     handlePageInit();
+
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeArticleModal();
+      }
+    };
+    document.body.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      document.body.removeEventListener('keyup', handleKeyUp);
+    };
+
   }, [props.id]);
 
   return (
@@ -94,7 +112,7 @@ export function FeedPage(props: FeedPageProps) {
       <FeedArticleDetailsModal
 		article={selectedArticle}
 		isOpen={articleModal.isOpen}
-		onCancel={articleModal.closeModal}
+		onCancel={closeArticleModal}
 	  />
       <NotificationToast
         notification={notifications.notification}
