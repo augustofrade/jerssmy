@@ -1,3 +1,4 @@
+import { Newspaper } from 'lucide-preact';
 import { Fragment, h } from 'preact';
 import { route } from 'preact-router';
 import { useEffect, useState } from 'preact/hooks';
@@ -79,7 +80,10 @@ export function FeedPage(props: FeedPageProps) {
   }
 
   function setArticleList(articles: feed.FeedArticleListItemDto[]) {
-    setArticles(curr => [...curr, ...articles].sort((a, b) => b.PublicationDate - a.PublicationDate));
+    setArticles(curr =>
+      [...curr, ...articles].sort((a, b) => 
+        new Date(b.PublicationDate).getTime() - new Date(a.PublicationDate).getTime())
+    );
   }
 
   function closeArticleModal() {
@@ -140,15 +144,18 @@ export function FeedPage(props: FeedPageProps) {
       <section class="panel feed-page__articles is-flex-grow-1">
         {articles.map(article => (
           <a class="panel-block" key={article.Url} onClick={() => handleArticleClick(article)}>
+            <span className="panel-icon">
+              {!article.Read && <span className="button is-primary" style={{ padding: 0, width: "12px", height: "12px"  }} />}
+            </span>
             <div class="feed-page__article-content">
               <span class="feed-page__article-content-label">
-                <p class={`feed-page__article-content-title ${article.Read ? '' : 'has-text-weight-semibold'}`}>
+                <p class={`text-ellipsis-95 ${article.Read ? '' : 'has-text-weight-semibold'}`}>
                   {article.Title}
                 </p>
-                {article.IsNew && <span class="tag is-link is-light">New</span>}
               </span>
               <p class="is-size-7">{new Date(article.PublicationDate).toLocaleString()}</p>
             </div>
+            { article.IsNew && <span class="tag is-link is-light">New</span> }
           </a>
         ))}
       </section>

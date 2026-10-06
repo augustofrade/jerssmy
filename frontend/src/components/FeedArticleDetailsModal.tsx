@@ -1,3 +1,4 @@
+import { ExternalLink } from 'lucide-preact';
 import { h } from 'preact';
 import { feed } from '../../wailsjs/go/models';
 import { BrowserOpenURL } from '../../wailsjs/runtime/runtime';
@@ -47,6 +48,8 @@ export function FeedArticleDetailsModal(props: FeedArticleDetailsModalProps) {
     BrowserOpenURL(url.toString());
   }
 
+
+
 	return (
 		<Modal
 			title={props.article.Title}
@@ -57,17 +60,32 @@ export function FeedArticleDetailsModal(props: FeedArticleDetailsModalProps) {
 			bodyClassName="feed-article-modal-body"
 		>
 			<div className="content feed-article-modal-content">
-				<p className="is-size-6 has-text-weight-semibold has-text-grey">{formatArticleMeta(props.article)}</p>
+			<div className="is-justify-content-space-between is-flex is-align-items-center mb-4">
+				<span className="is-size-6 has-text-weight-semibold has-text-grey">{formatArticleMeta(props.article)}</span>
+				<button onClick={() => BrowserOpenURL(new URL(props.article!.Url).toString())} className="button is-link is-light">
+					<span className="icon">
+						<ExternalLink />
+					</span>
+					<span>View in browser</span>
+				</button>
+			</div>
 				{props.article.Thumbnail && (
-					<figure className="feed-article-modal-thumbnail image">
+					<figure className="feed-article-modal-thumbnail image mb-4">
 						<img src={props.article.Thumbnail} alt={props.article.Title} />
 					</figure>
 				)}
-				<div
-          className="feed-article-modal-rich-content"
-          onClick={handleContentClick}
-          dangerouslySetInnerHTML={{ __html: props.article.Content }}
-        />
+				<p className="has-text-weight-semibold">{props.article.Summary}</p>
+				{
+					props.article.Content
+					? <div
+							className="feed-article-modal-rich-content"
+							onClick={handleContentClick}
+							dangerouslySetInnerHTML={{ __html: props.article.Content }}
+						/>
+					: <div>
+							<p className="is-italic">No content available.</p>
+						</div>
+				}
 			</div>
 		</Modal>
 	);

@@ -24,8 +24,8 @@ export function Modal(props: ModalProps) {
     <div className="modal is-active">
       <div className="modal-background" onClick={props.onCancel}></div>
       <div className={`modal-card ${props.cardClassName ?? ''}`.trim()}>
-        <header className="modal-card-head">
-          <p className="modal-card-title">{props.title}</p>
+        <header className="modal-card-head is-justify-content-space-between">
+          <p className="modal-card-title" style={{ maxWidth: "90%" }}>{props.title}</p>
           {
             props.onCancel &&
             <button className="delete" aria-label="close" onClick={props.onCancel}></button>

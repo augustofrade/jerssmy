@@ -2,6 +2,7 @@ html,
 body {
     height: 100vh;
     overflow: hidden;
+    scroll-behavior: smooth;
 }
 
 body {
@@ -43,24 +44,37 @@ body {
 .feed-page__articles {
     min-height: 0;
     overflow-y: auto;
+    overflow-x: hidden;
     margin-bottom: 0;
 }
 
-.feed-page__article-content {
-    width: 100%;
+.feed-page__articles * {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
+
+.feed-page__article-content {
+    flex: 1;
+    min-width: 0;
+}
+
 .feed-page__article-content-label {
     display: flex;
+    min-width: 0;
     gap: 0.5rem;
     align-items: center;
     justify-content: space-between;
 }
 
-.feed-page__article-content-title {
+.text-ellipsis-95 {
+    flex: 1;
+    min-width: 0;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
-    max-width: 90%;
+    max-width: 95%;
 }
 
 .notification-toast-container {
@@ -87,10 +101,6 @@ body {
     overflow-y: auto;
     border-bottom-left-radius: var(--bulma-radius-large);
     border-bottom-right-radius: var(--bulma-radius-large);
-}
-
-.feed-article-modal-thumbnail {
-    margin: 1rem 0 1.5rem;
 }
 
 .feed-article-modal-thumbnail img {
