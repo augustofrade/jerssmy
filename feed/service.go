@@ -2,7 +2,7 @@ package feed
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -16,12 +16,14 @@ var (
 )
 
 type Service struct {
-	repo *Repository
+	repo   *Repository
+	logger *slog.Logger
 }
 
-func NewService(repo *Repository) *Service {
+func NewService(repo *Repository, logger *slog.Logger) *Service {
 	return &Service{
-		repo: repo,
+		repo:   repo,
+		logger: logger,
 	}
 }
 
@@ -55,7 +57,16 @@ func (s *Service) CreateFeed(title string, url string) (*Feed, error) {
 	}
 
 	err = s.repo.InsertFeed(&f)
-	return &f, err
+	if err != nil {
+		return nil, err
+	}
+
+	s.logger.Info("New Feed created",
+		slog.String("feed.Title", f.Title),
+		slog.String("feed.Url", f.Url),
+	)
+
+	return &f, nil
 }
 
 func (s *Service) UpdateFeed(id int, options UpdateFeedOptions) error {
@@ -111,6 +122,11 @@ func (s *Service) GetStoredArticles(feedId int) ([]FeedArticleListItemDto, error
 		})
 	}
 
+	s.logger.Debug("Finished retrieving stored articles",
+		slog.Int("feedId", feedId),
+		slog.Int("amount", len(as)),
+	)
+
 	return as, nil
 }
 
@@ -135,11 +151,13 @@ func (s *Service) FetchRemoteArticles(feedId int) ([]FeedArticleListItemDto, err
 
 	feedXml, err := syndication.Fetch(f.Url)
 	if err != nil {
+		s.logger.Error("Failed to fetch syndication XML", slog.String("reason", err.Error()))
 		return as, err
 	}
 
 	articleItr, err := syndication.DecodeArticles(feedXml)
 	if err != nil {
+		s.logger.Error("Failed to decode syndication XML", slog.String("reason", err.Error()))
 		return as, err
 	}
 
@@ -162,14 +180,14 @@ func (s *Service) FetchRemoteArticles(feedId int) ([]FeedArticleListItemDto, err
 
 	newUrls, err := s.repo.GetMissingArticleUrls(feedId, remoteUrls)
 	if err != nil {
-		return as, nil
+		return as, err
 	}
 
 	if len(newUrls) == 0 {
 		return as, nil
 	}
 
-	log.Println("New URLs found from remote Feed XML")
+	s.logger.Info("New URLs found from remote Feed XML", slog.Int("feedId", feedId))
 
 	newArticles := []FeedArticle{}
 
@@ -198,6 +216,11 @@ func (s *Service) FetchRemoteArticles(feedId int) ([]FeedArticleListItemDto, err
 	if err != nil {
 		return nil, err
 	}
+
+	s.logger.Debug("Successfully fetched syndication and inserted new articles",
+		slog.Int("feedId", feedId),
+		slog.Int("amount", len(as)),
+	)
 
 	return as, nil
 }

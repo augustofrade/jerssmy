@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strings"
 	"time"
 )
@@ -14,12 +15,14 @@ var (
 )
 
 type Repository struct {
-	db *sql.DB
+	db     *sql.DB
+	logger *slog.Logger
 }
 
-func NewRepository(db *sql.DB) *Repository {
+func NewRepository(db *sql.DB, logger *slog.Logger) *Repository {
 	return &Repository{
-		db: db,
+		db:     db,
+		logger: logger,
 	}
 }
 
@@ -30,6 +33,7 @@ func (s *Repository) InsertFeed(f *Feed) error {
 		f.Title, f.Url, createdAtStr)
 
 	if err != nil {
+		s.logger.Error("Failed to insert feed", slog.String("error", err.Error()))
 		return err
 	}
 
@@ -46,6 +50,7 @@ func (s *Repository) UpdateFeed(id int, options UpdateFeedOptions) error {
 	WHERE id = ?`, options.Title, id)
 
 	if err != nil {
+		s.logger.Error("Failed to update feed", slog.String("reason", err.Error()))
 		return err
 	}
 
@@ -55,6 +60,7 @@ func (s *Repository) UpdateFeed(id int, options UpdateFeedOptions) error {
 	}
 
 	if rows == 0 {
+		s.logger.Debug("Failed to update feed", slog.String("reason", "feed not found"))
 		return ErrFeedNotFound
 	}
 
@@ -63,6 +69,10 @@ func (s *Repository) UpdateFeed(id int, options UpdateFeedOptions) error {
 
 func (s *Repository) RemoveFeed(id int) error {
 	_, err := s.db.Exec("DELETE FROM feeds WHERE id = ?", id)
+	if err != nil {
+		s.logger.Error("Failed to remove feed", slog.String("reason", err.Error()))
+	}
+
 	return err
 }
 
@@ -74,7 +84,9 @@ func (s *Repository) GetFeedByID(id int64) (*Feed, error) {
 		"SELECT id, title, url, created_at FROM feeds WHERE id = ?",
 		id,
 	).Scan(&feed.Id, &feed.Title, &feed.Url, &createdAtRaw)
+
 	if err != nil {
+		s.logger.Error("Failed to get feed by ID", slog.String("reason", err.Error()))
 		return nil, err
 	}
 
@@ -92,6 +104,7 @@ func (s *Repository) GetFeeds() ([]Feed, error) {
 	feeds := []Feed{}
 
 	if err != nil {
+		s.logger.Error("Failed to get feeds", slog.String("reason", err.Error()))
 		return feeds, err
 	}
 
@@ -102,11 +115,16 @@ func (s *Repository) GetFeeds() ([]Feed, error) {
 		var title, url, createdAtRaw string
 
 		if err := rows.Scan(&id, &title, &url, &createdAtRaw); err != nil {
+			s.logger.Error("Failed to scan feed row", slog.String("reason", err.Error()))
 			return nil, err
 		}
 
 		createdAt, err := time.Parse(time.RFC3339, createdAtRaw)
 		if err != nil {
+			s.logger.Error("Failed to parse feed creation date",
+				slog.String("createdAt", createdAtRaw),
+				slog.String("reason", err.Error()),
+			)
 			return nil, err
 		}
 
@@ -120,6 +138,7 @@ func (s *Repository) GetFeeds() ([]Feed, error) {
 	}
 
 	if err = rows.Err(); err != nil {
+		s.logger.Error("Failed while iterating feeds", slog.String("reason", err.Error()))
 		return nil, err
 	}
 
@@ -134,6 +153,10 @@ func (s *Repository) GetFeedIDByUrl(url string) (int, error) {
 		if errors.Is(err, sql.ErrNoRows) {
 			return 0, ErrFeedNotFound
 		}
+		s.logger.Error("Failed to get feed ID by Url",
+			slog.String("url", url),
+			slog.String("reason", err.Error()),
+		)
 		return 0, err
 	}
 
@@ -144,6 +167,7 @@ func (s *Repository) GetFeedIDByUrl(url string) (int, error) {
 func (s *Repository) GetArticles(feedId int) ([]FeedArticle, error) {
 	rows, err := s.db.Query("SELECT title, url, publication_date, summary, author, thumbnail, content, read FROM feed_articles WHERE feed_id = ?", feedId)
 	if err != nil {
+		s.logger.Error("Failed to get articles of a feed", slog.String("reason", err.Error()))
 		return nil, err
 	}
 	defer rows.Close()
@@ -214,6 +238,11 @@ func (s *Repository) GetMissingArticleUrls(feedId int, urls []string) ([]string,
 
 	rows, err := s.db.Query(query, vals...)
 	if err != nil {
+		s.logger.Error("Failed to query missing article URLs",
+			slog.Int("feedId", feedId),
+			slog.Int("amount", len(urls)),
+			slog.String("reason", err.Error()),
+		)
 		return nil, err
 	}
 	defer rows.Close()
@@ -223,13 +252,25 @@ func (s *Repository) GetMissingArticleUrls(feedId int, urls []string) ([]string,
 	for rows.Next() {
 		var url string
 		if err := rows.Scan(&url); err != nil {
+			s.logger.Error("Failed to scan missing article URL",
+				slog.Int("feedId", feedId),
+				slog.String("reason", err.Error()),
+			)
 			return nil, err
 		}
 
 		missing = append(missing, url)
 	}
 
-	return missing, rows.Err()
+	if err := rows.Err(); err != nil {
+		s.logger.Error("Failed while iterating missing article URLs",
+			slog.Int("feedId", feedId),
+			slog.String("reason", err.Error()),
+		)
+		return nil, err
+	}
+
+	return missing, nil
 
 }
 
@@ -252,16 +293,32 @@ func (s *Repository) InsertArticlesBatch(fas []FeedArticle) error {
 	}
 
 	_, err := s.db.Exec(b.String(), args...)
+	if err != nil {
+		feedId := fas[0].FeedId
+		s.logger.Error("Failed to insert article batch",
+			slog.Int64("feedId", feedId),
+			slog.Int("amount", len(fas)),
+			slog.String("reason", err.Error()),
+		)
+	}
 	return err
 }
 
 func (s *Repository) MarkArticleAsRead(url string) error {
 	rows, err := s.db.Exec("UPDATE feed_articles SET read = 1 WHERE url = ?", url)
 	if err != nil {
+		s.logger.Error("Failed to mark article as read",
+			slog.String("url", url),
+			slog.String("reason", err.Error()),
+		)
 		return err
 	}
 	affected, err := rows.RowsAffected()
 	if err != nil {
+		s.logger.Error("Failed to count affected rows when marking article as read",
+			slog.String("url", url),
+			slog.String("reason", err.Error()),
+		)
 		return err
 	}
 	if affected == 0 {

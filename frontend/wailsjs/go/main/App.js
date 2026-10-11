@@ -18,10 +18,6 @@ export function GetStoredArticles(arg1) {
   return window['go']['main']['App']['GetStoredArticles'](arg1);
 }
 
-export function Greet(arg1) {
-  return window['go']['main']['App']['Greet'](arg1);
-}
-
 export function ListFeeds() {
   return window['go']['main']['App']['ListFeeds']();
 }
