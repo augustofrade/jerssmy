@@ -1,8 +1,10 @@
+import { Bolt, MoonStar, Plus, Sun } from 'lucide-preact';
 import { ComponentChildren, Fragment, FunctionComponent, h } from 'preact';
 import { Link, Match } from 'preact-router/match';
 import { useEffect, useState } from 'preact/hooks';
 import { feed } from '../../wailsjs/go/models';
 import { FeedCreateModal } from '../components/FeedCreateModal';
+import { Theme, useTheme } from '../contexts/ThemeContext';
 import { useModal } from '../hooks/useModal';
 import { FeedService } from '../services/FeedService';
 
@@ -17,6 +19,7 @@ const MatchLink = Link as unknown as FunctionComponent<MatchLinkProps>;
 
 export function MainLayout(props: any) {
   const [feeds, setFeeds] = useState<feed.Feed[]>([]);
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     let isCancelled = false;
@@ -49,8 +52,35 @@ export function MainLayout(props: any) {
     />
 
     <div className="columns is-gapless m-0 app-shell">
-      <aside className="column is-one-quarter">
-        <div className="menu p-5" style={{ backgroundColor: "var(--bulma-link-95)", height: "100%" }}>
+      <aside className="column is-one-quarter has-background" style={{ height: "100%" }}>
+        <div className="columns px-2 py-3">
+          <div className="column is-align-content-center is-narrow">
+            <NavButton theme={theme}>
+              <Bolt className="icon-small" />
+            </NavButton>
+          </div>
+          <div className="column is-align-content-center p-0">
+            <NavButton
+              className="is-primary is-fullwidth"
+              lightClassName="is-light"
+              theme={theme}
+              onClick={modal.openModal}
+            >
+              <Plus className="icon-small" />
+              Add Feed
+            </NavButton>
+          </div>
+          <div className="column is-align-content-center is-narrow">
+            <NavButton theme={theme} onClick={toggleTheme}>
+              {
+                theme === "light"
+                ? <Sun className="icon-small" />
+                : <MoonStar className="icon-small" />
+              }
+            </NavButton>
+          </div>
+        </div>
+        <div className="menu px-2">
           <p className="menu-label">General</p>
           <ul className="menu-list">
             <li>
@@ -64,20 +94,7 @@ export function MainLayout(props: any) {
             </li>
           </ul>
           <div className="menu-label">
-            <div className="level">
-              <div className="level-left">
-                <div className="level-item">
-                  Feeds
-                </div>
-              </div>
-              <div className="level-right">
-                <div className="level-item">
-                  <button className="button is-primary is-light is-small" onClick={modal.openModal}>
-                    Add Feed
-                    </button>
-                </div>
-              </div>
-            </div>
+            Feeds
           </div>
           <ul className="menu-list">
             {feeds.map(f => (
@@ -96,4 +113,24 @@ export function MainLayout(props: any) {
     </div>
     </>
   )
+}
+
+interface NavButtonProps {
+  theme: Theme;
+  children: preact.ComponentChildren;
+  className?: string;
+  lightClassName?: string;
+  onClick?: () => void;
+}
+
+function NavButton({ theme, children, onClick, className, lightClassName }: NavButtonProps) {
+
+  return (
+    <button
+      className={`button is-small ${theme === 'light' ? lightClassName ?? 'is-white' : 'is-dark'} ${className ?? ''}`}
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
 }
